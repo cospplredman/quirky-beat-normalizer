@@ -33,7 +33,6 @@ function parseOsu(){
 }
 
 function record(){
-	parseOsu();
 	let ctx = new AudioContext();
 	let audio = new Audio(file2url(audioFile));
 	console.log(audio);
@@ -53,39 +52,41 @@ function record(){
 		audioElement.src = URL.createObjectURL(blob);
 	}
 
-	recorder.start();
-	console.log(recorder);
+	audio.onended = (ev) => {
+		recorder.stop();
+	}
 
 
+
+	let prevst = 0;
 	let ctp = 0;
-	let ptime = 0;
 	let fn = () => {
-		if(ctp == timingPoints.length){
-			clearInterval(interval);
-			return;
-		}
-
+		prevst = timingPoints[ctp][0];
 		let ctime = audio.currentTime * 1000;
-		let deltat = ctime - ptime;
-		ptime = ctime;
 		let tpms = timingPoints[ctp][0];
 		//console.log(deltat);
 
-		if(ctime > tpms){
-			//let tmspb = 60000/targetBPM;
-			let tmspb = targetMSPB;
-			let mspb = timingPoints[ctp][1];
-			audio.playbackRate = mspb/tmspb;
-			console.log(ctime, timingPoints[ctp], tmspb, mspb, mspb/tmspb);
-			ctp++;
-		}
-	}
-	var interval = setInterval(fn, 1);
+		let wt = prevst - ctime;
+		let st = performance.now();
+		while(performance.now()-st < wt);
+		//let tmspb = 60000/targetBPM;
+		let tmspb = targetMSPB;
+		let mspb = timingPoints[ctp][1];
+		audio.playbackRate = mspb/tmspb;
+		console.log(ctime + performance.now() - st, timingPoints[ctp], tmspb, mspb, mspb/tmspb);
+		ctp++;
+		
+		if(ctp == timingPoints.length)
+			return;
 
-	audio.onended = (ev) => {
-		recorder.stop();
-		clearInterval(interval);
+		let nextTimeout = timingPoints[ctp][0] - prevst - 40;
+		if(nextTimeout < 0)
+			nextTimeout = 0;
+
+		setTimeout(fn, nextTimeout);
 	}
 
+	recorder.start();
 	audio.play();
+	setTimeout(fn, timingPoints[ctp][0] - prevst - 40);
 }
