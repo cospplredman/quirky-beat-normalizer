@@ -1,15 +1,9 @@
-
-
 let audioFile;
 let osuFile;
 let audioElement = document.getElementById("player");
 let timingPoints = [];
 let targetBPM = 180;
 let targetMSPB = 400;
-
-function file2url(f){
-	     return URL.createObjectURL(f);
-}
 
 function download(url){
 	var a = document.createElement('a');
@@ -37,13 +31,11 @@ function waitms(m){
 	while(performance.now()-st < m);
 }
 
-function record(){
+async function start(){
 	let ctx = new AudioContext();
-	let audio = new Audio(file2url(audioFile));
-	console.log(audio);
+	let audio = new Audio(URL.createObjectURL(audioFile));
 	let dest = ctx.createMediaStreamDestination();
 	let src = ctx.createMediaElementSource(audio);
-	src.connect(dest);
 	let recorder = new MediaRecorder(dest.stream, {mimeType: "audio/webm"});
 
 	let chunks = [];
@@ -61,33 +53,45 @@ function record(){
 		recorder.stop();
 	}
 
-
-
-	let dur = audio.duration * 1000;
-
-	recorder.start();
-	audio.play();
-	let sttime = performance.now();
-	let ptpms = 0;
-	let i = 0;
+	let start;
+	let sttime, i = 0;
+	let delay = timingPoints[i][0];
 	let fn = () => {
-		let dt = performance.now() - sttime;
-		let tpms = timingPoints[i][0];
-		prevst = timingPoints[i][0];
+		let ct = performance.now();
+		let dt = ct - sttime;
+		sttime = ct;
 
-		let wt = (tpms - ptpms - dt)/audio.playbackRate;
-		ptpms = tpms;
+		let wt = delay - dt;
 		waitms(wt);
 
 		//let tmspb = 60000/targetBPM;
 		let tmspb = targetMSPB;
 		let mspb = timingPoints[i][1];
 		audio.playbackRate = mspb/tmspb;
-		console.log(audio.currentTime, timingPoints[i], tmspb, mspb, mspb/tmspb);
 		i++;
-		sttime = performance.now();
-		if(i < timingPoints.length)
-			setTimeout(fn, 1);
+
+		if(i < timingPoints.length){
+			delay = (timingPoints[i][0] - timingPoints[i-1][0])/mspb*tmspb;
+			console.log(delay, ct - start, audio.currentTime*1000);
+
+			if(delay > 500)
+				setTimeout(fn, delay - 500);
+			else
+				setTimeout(fn, 1);
+		}
 	}
-	setTimeout(fn, 1);
+
+	audio.oncanplay = (ev) => {
+		src.connect(dest);
+		recorder.start();
+		audio.play().then((v)=>{
+			start = sttime = performance.now();
+			setTimeout(fn, 1);
+		});
+		console.log(recorder, audio);
+	}
+
+	audio.ontimeupdate = (ev) => {
+		console.log((100*audio.currentTime/audio.duration) | 0);
+	}
 }

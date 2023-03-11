@@ -1,12 +1,28 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>retimer</title>
+		<title>re-timer</title>
 	</head>
 	<body>
+		<table>
+			<tr>
+				<td>.osu</td>
+				<td>
+					<input type="file" onchange="osuFile=this.files[0];parseOsu()"></input>
+				</td>
+			</tr>
+			<tr>
+				<td>.mp3</td>
+				<td>
+					<input type="file" onchange="audioFile=this.files[0]"></input>
+				</td>
+			</tr>
+		</table>
+		<div>
+			<button onclick="start(this)">start</button>
+		</div>
+
 		<audio controls id="player"></audio>
-		<input type="file" onchange="osuFile=this.files[0];parseOsu()">.osu</input>
-		<input type="file" onchange="audioFile=this.files[0]">.mp3</input>
 		<script src="script.js"></script>
 	</body>
 </html>
