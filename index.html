@@ -4,8 +4,9 @@
 		<title>retimer</title>
 	</head>
 	<body>
-		<input type="file">.osu</input>
-		<input type="file">.mp3</input>
+		<audio controls id="player"></audio>
+		<input type="file" onchange="osuFile=this.files[0]">.osu</input>
+		<input type="file" onchange="audioFile=this.files[0]">.mp3</input>
 		<script src="script.js"></script>
 	</body>
 </html>
