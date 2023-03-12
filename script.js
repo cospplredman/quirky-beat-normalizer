@@ -26,9 +26,24 @@ function parseOsu(){
 	});
 }
 
-function waitms(m){
-	let st = performance.now();
-	while(performance.now()-st < m);
+function waitUntil(m){
+	while(performance.now() < m);
+}
+
+function runWhen(fn, ms){
+	let delfn = () => {
+		waitUntil(ms);
+		fn();
+	}
+
+	//shutup
+	let delay = ms - performance.now();
+	if(delay > 500){
+		console.log("wait too long: settimeout", delay - 500);
+		setTimeout(delfn, delay - 500);
+	}else{
+		setTimeout(delfn, 1);
+	}
 }
 
 async function start(){
@@ -42,56 +57,46 @@ async function start(){
 
 	recorder.ondataavailable = (ev) => {
 		chunks.push(ev.data);
-	}
+	};
 
 	recorder.onstop = (ev) => {
 		let blob = new Blob(chunks, {type: "audio/webm" });
 		audioElement.src = URL.createObjectURL(blob);
-	}
+	};
 
 	audio.onended = (ev) => {
 		recorder.stop();
-	}
+	};
 
-	let start;
-	let sttime, i = 0;
-	let delay = timingPoints[i][0];
+	let i = 0;
+	let sttime = 0;
+	let etime = 0;
 	let fn = () => {
-		let ct = performance.now();
-		let dt = ct - sttime;
-		sttime = ct;
-
-		let wt = delay - dt;
-		waitms(wt);
-
-		//let tmspb = 60000/targetBPM;
 		let tmspb = targetMSPB;
 		let mspb = timingPoints[i][1];
 		audio.playbackRate = mspb/tmspb;
 		i++;
 
 		if(i < timingPoints.length){
-			delay = (timingPoints[i][0] - timingPoints[i-1][0])/mspb*tmspb;
-			console.log(delay, ct - start, audio.currentTime*1000);
-
-			if(delay > 500)
-				setTimeout(fn, delay - 500);
-			else
-				setTimeout(fn, 1);
+			let delay = (timingPoints[i][0] - timingPoints[i-1][0])/mspb*tmspb;
+			etime += delay;
+			console.log(etime - audio.currentTime*1000, delay, timingPoints[i]);
+			runWhen(fn, sttime + etime);
 		}
-	}
+	};
 
 	audio.oncanplay = (ev) => {
 		src.connect(dest);
 		recorder.start();
 		audio.play().then((v)=>{
-			start = sttime = performance.now();
-			setTimeout(fn, 1);
+			sttime = performance.now();
+			etime += timingPoints[i][0];
+			runWhen(fn, sttime + etime);
 		});
 		console.log(recorder, audio);
-	}
+	};
 
 	audio.ontimeupdate = (ev) => {
 		console.log((100*audio.currentTime/audio.duration) | 0);
-	}
+	};
 }
