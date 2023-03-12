@@ -1,6 +1,5 @@
 let audioFile;
 let osuFile;
-let audioElement = document.getElementById("player");
 let timingPoints = [];
 let targetBPM = 180;
 let targetMSPB = 400;
@@ -61,7 +60,7 @@ async function start(){
 
 	recorder.onstop = (ev) => {
 		let blob = new Blob(chunks, {type: "audio/webm" });
-		audioElement.src = URL.createObjectURL(blob);
+		console.log(URL.createObjectURL(blob)); //TODO download button
 	};
 
 	audio.onended = (ev) => {
