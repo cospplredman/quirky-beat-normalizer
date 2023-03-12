@@ -2,27 +2,34 @@
 <html>
 	<head>
 		<title>re-timer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="images/favicon.svg" sizes="any" type="image/svg+xml">
 	</head>
 	<body>
-		<table>
-			<tr>
-				<td>.osu</td>
-				<td>
-					<input type="file" onchange="osuFile=this.files[0];parseOsu()"></input>
-				</td>
-			</tr>
-			<tr>
-				<td>.mp3</td>
-				<td>
-					<input type="file" onchange="audioFile=this.files[0]"></input>
-				</td>
-			</tr>
-		</table>
-		<div>
-			<button onclick="start(this)">start</button>
-		</div>
-
-		<audio controls id="player"></audio>
+    <h1>Re-Timer</h1>
+    <div id="container">
+      <table>
+        <tr>
+          <td>.osu</td>
+          <td>
+            <input type="file" onchange="osuFile=this.files[0];parseOsu()"></input>
+          </td>
+        </tr>
+        <tr>
+          <td>.mp3</td>
+          <td>
+            <input type="file" onchange="audioFile=this.files[0]"></input>
+          </td>
+        </tr>
+      </table>
+      <div id="progress-bar-container">
+        <div id="progress-bar"></div>
+      </div>
+      <div id="button-container">
+        <div id="start-button" onclick="start(this)">Start</div>
+        <div id="download-button" onclick="">Download</div>
+      </div>
+    </div>
 		<script src="script.js"></script>
 	</body>
 </html>
