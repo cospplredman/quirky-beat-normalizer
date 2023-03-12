@@ -5,6 +5,7 @@ let targetBPM = 180;
 let targetMSPB = 400;
 
 let downloadButton = document.getElementById("download-button");
+downloadButton.id = "download-button-hidden";
 let startButton = document.getElementById("start-button");
 let progressBar = document.getElementById("progress-bar");
 
@@ -48,11 +49,14 @@ function runWhen(fn, ms){
 }
 
 async function start(){
+
 	let ctx = new AudioContext();
 	let audio = new Audio(URL.createObjectURL(audioFile));
 	let dest = ctx.createMediaStreamDestination();
 	let src = ctx.createMediaElementSource(audio);
 	let recorder = new MediaRecorder(dest.stream, {mimeType: "audio/webm"});
+	
+	startButton.id = "start-button-hidden";
 
 	let chunks = [];
 
@@ -62,7 +66,13 @@ async function start(){
 
 	recorder.onstop = (ev) => {
 		let blob = new Blob(chunks, {type: "audio/webm" });
-		downloadButton.onclick = ()=>download(URL.createObjectURL(blob));
+		chunks = [];
+		startButton.id = "start-button";
+		downloadButton.id = "download-button";
+		downloadButton.onclick = ()=>{
+			download(URL.createObjectURL(blob));
+			downloadButton.id = "download-button-hidden";
+		};
 	};
 
 	audio.onended = (ev) => {
@@ -96,6 +106,6 @@ async function start(){
 	};
 
 	audio.ontimeupdate = (ev) => {
-		progressBar.style.width = (7 + (93*audio.currentTime/audio.duration) | 0) + "px";
+		progressBar.style.width = (7 + (94*audio.currentTime/audio.duration) | 0) + "%";
 	};
 }
