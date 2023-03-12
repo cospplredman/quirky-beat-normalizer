@@ -4,6 +4,10 @@ let timingPoints = [];
 let targetBPM = 180;
 let targetMSPB = 400;
 
+let downloadButton = document.getElementById("download-button");
+let startButton = document.getElementById("start-button");
+let progressBar = document.getElementById("progress-bar");
+
 function download(url){
 	var a = document.createElement('a');
 	a.href = url;
@@ -37,12 +41,10 @@ function runWhen(fn, ms){
 
 	//shutup
 	let delay = ms - performance.now();
-	if(delay > 500){
-		console.log("wait too long: settimeout", delay - 500);
+	if(delay > 500)
 		setTimeout(delfn, delay - 500);
-	}else{
+	else
 		setTimeout(delfn, 1);
-	}
 }
 
 async function start(){
@@ -60,7 +62,7 @@ async function start(){
 
 	recorder.onstop = (ev) => {
 		let blob = new Blob(chunks, {type: "audio/webm" });
-		console.log(URL.createObjectURL(blob)); //TODO download button
+		downloadButton.onclick = ()=>download(URL.createObjectURL(blob));
 	};
 
 	audio.onended = (ev) => {
@@ -79,7 +81,6 @@ async function start(){
 		if(i < timingPoints.length){
 			let delay = (timingPoints[i][0] - timingPoints[i-1][0])/mspb*tmspb;
 			etime += delay;
-			console.log(etime - audio.currentTime*1000, delay, timingPoints[i]);
 			runWhen(fn, sttime + etime);
 		}
 	};
@@ -92,10 +93,9 @@ async function start(){
 			etime += timingPoints[i][0];
 			runWhen(fn, sttime + etime);
 		});
-		console.log(recorder, audio);
 	};
 
 	audio.ontimeupdate = (ev) => {
-		console.log((100*audio.currentTime/audio.duration) | 0);
+		progressBar.style.width = (7 + (93*audio.currentTime/audio.duration) | 0) + "px";
 	};
 }
