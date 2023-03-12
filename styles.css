@@ -22,6 +22,7 @@ body {
   border-radius: 15px;
   margin-top: 1em;
   padding: 4em;
+  filter: drop-shadow(4px 4px 5px #212326);
 }
 
 #container input {
@@ -38,7 +39,7 @@ body {
   margin-left: 1em;
 }
 
-#start-button {
+#start-button, #start-button-hidden, #download-button, #download-button-hidden {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -49,18 +50,24 @@ body {
   padding: 0.4em 0.8em 0.4em 0.8em;
 }
 
+#start-button-hidden {
+  background: #C2C2C2;
+  user-select: none;
+}
+
 #start-button:hover {
   cursor: pointer;
 }
 
-#download-button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.8em;
-  border-radius: 6px;
+#download-button, #download-button-hidden {
   border: 1px solid #84F0FF;
-  padding: 0.2em 0.8em 0.2em 0.8em;
+  background: none;
+  color: #D2D2D2;
+}
+
+#download-button-hidden {
+  border: 1px solid #C2C2C2;
+  user-select: none;
 }
 
 #download-button:hover {
